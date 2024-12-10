@@ -13,27 +13,35 @@ hrnet = HRNET(model_path, model_type, conf_thres=0.5)
 person_detector_path = "models/yolov5s6.onnx"
 person_detector = PersonDetector(person_detector_path)
 
-# Read image
-img_url = "https://upload.wikimedia.org/wikipedia/commons/e/ea/Flickr_-_The_U.S._Army_-_%27cavalry_charge%27.jpg"
-img = imread_from_url(img_url)
-img = cv2.imread("input.png")
+# Read image (using URL as fallback)
+img_url = "https://wavewear.cc/cdn/shop/articles/parkour_1.jpg?v=1691646892&width=1100"
+local_image_path = "input.png"
+
+# Try loading the local image first
+img = cv2.imread(local_image_path)
+if img is None:
+    print(f"Local image '{local_image_path}' not found. Attempting to load from URL.")
+    img = imread_from_url(img_url)
+    if img is None:
+        raise FileNotFoundError(f"Could not load image from URL: {img_url}")
 
 # Detect People in the image
 detections = person_detector(img)
 ret, person_detections = filter_person_detections(detections)
 
 if ret:
-
     # Estimate the pose in the image
     total_heatmap, peaks = hrnet(img, person_detections)
 
     # Draw Model Output
     img = hrnet.draw_pose(img)
 
-    # Draw detections
+    # Draw detections (optional)
     # img = person_detector.draw_detections(img)
 
+# Display and save the output image
 cv2.namedWindow("Model Output", cv2.WINDOW_NORMAL)
 cv2.imshow("Model Output", img)
 cv2.imwrite("doc/img/output.jpg", img)
 cv2.waitKey(0)
+cv2.destroyAllWindows()

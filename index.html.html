@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Command</title>
+</head>
+<body>
+    <h1>Run Pose Estimation Command</h1>
+    <button id="run-btn">Run Command</button>
+    <p id="output"></p>
+    <script>
+        document.getElementById('run-btn').addEventListener('click', () => {
+            fetch('/run-command', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('output').innerText = data.output;
+                    } else {
+                        document.getElementById('output').innerText = `Error: ${data.error}`;
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('output').innerText = `Error: ${err}`;
+                });
+        });
+    </script>
+</body>
+</html>
